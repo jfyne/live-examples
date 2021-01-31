@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jfyne/live"
-	"github.com/jfyne/live/component"
+	"github.com/jfyne/live/page"
 )
 
 const (
@@ -43,12 +43,12 @@ func NewClockState(timezone string) (*ClockState, error) {
 	return c, nil
 }
 
-func NewClock(ID string, h *live.Handler, s *live.Socket, timezone string) (component.Component, error) {
-	return component.New(
+func NewClock(ID string, h *live.Handler, s *live.Socket, timezone string) (page.Component, error) {
+	return page.NewComponent(
 		ID,
 		h,
 		s,
-		component.WithRegister(func(c *component.Component) error {
+		page.WithRegister(func(c *page.Component) error {
 			c.HandleSelf(tick, func(_ map[string]interface{}) (interface{}, error) {
 				clock, ok := c.State.(*ClockState)
 				if !ok {
@@ -65,7 +65,7 @@ func NewClock(ID string, h *live.Handler, s *live.Socket, timezone string) (comp
 			})
 			return nil
 		}),
-		component.WithMount(func(ctx context.Context, c *component.Component, r *http.Request, connected bool) error {
+		page.WithMount(func(ctx context.Context, c *page.Component, r *http.Request, connected bool) error {
 			if connected {
 				go func() {
 					time.Sleep(1 * time.Second)
@@ -79,7 +79,7 @@ func NewClock(ID string, h *live.Handler, s *live.Socket, timezone string) (comp
 			c.State = state
 			return nil
 		}),
-		component.WithRender(func(w io.Writer, c *component.Component) error {
+		page.WithRender(func(w io.Writer, c *page.Component) error {
 			return c.HTML(`
                 <div>
                     <p>{{.TZ}}</p>

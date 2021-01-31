@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"github.com/jfyne/live"
-	"github.com/jfyne/live/component"
+	"github.com/jfyne/live/page"
 	"github.com/maragudk/gomponents"
-	"github.com/maragudk/gomponents/components"
+	comp "github.com/maragudk/gomponents/components"
 	"github.com/maragudk/gomponents/html"
 )
 
@@ -21,22 +21,22 @@ const (
 type PageState struct {
 	Title           string
 	ValidationError string
-	Timezones       []component.Component
+	Timezones       []page.Component
 }
 
 func pageState(title string) *PageState {
 	return &PageState{
 		Title:     title,
-		Timezones: []component.Component{},
+		Timezones: []page.Component{},
 	}
 }
 
-func NewPage(ID string, h *live.Handler, s *live.Socket, title string) (component.Component, error) {
-	return component.New(
+func NewPage(ID string, h *live.Handler, s *live.Socket, title string) (page.Component, error) {
+	return page.NewComponent(
 		ID,
 		h,
 		s,
-		component.WithRegister(func(c *component.Component) error {
+		page.WithRegister(func(c *page.Component) error {
 			// Handler for the timezone entry validation.
 			c.HandleEvent(validateTZ, func(p map[string]interface{}) (interface{}, error) {
 				// Get the current page component state.
@@ -69,7 +69,7 @@ func NewPage(ID string, h *live.Handler, s *live.Socket, title string) (componen
 					return state, nil
 				}
 
-				clock, err := component.Init(context.Background(), func() (component.Component, error) {
+				clock, err := page.Init(context.Background(), func() (page.Component, error) {
 					return NewClock(fmt.Sprintf("clock-%d", len(state.Timezones)+1), c.Handler, c.Socket, tz)
 				})
 				if err != nil {
@@ -82,17 +82,17 @@ func NewPage(ID string, h *live.Handler, s *live.Socket, title string) (componen
 
 			return nil
 		}),
-		component.WithMount(func(ctx context.Context, c *component.Component, r *http.Request, connected bool) error {
+		page.WithMount(func(ctx context.Context, c *page.Component, r *http.Request, connected bool) error {
 			c.State = pageState("Clocks")
 			return nil
 		}),
-		component.WithRender(func(w io.Writer, c *component.Component) error {
+		page.WithRender(func(w io.Writer, c *page.Component) error {
 			state, ok := c.State.(*PageState)
 			if !ok {
 				return fmt.Errorf("could not get state")
 			}
 
-			return components.HTML5(components.HTML5Props{
+			return comp.HTML5(comp.HTML5Props{
 				Title:    state.Title,
 				Language: "en",
 				Head: []gomponents.Node{
@@ -115,7 +115,7 @@ func NewPage(ID string, h *live.Handler, s *live.Socket, title string) (componen
 					),
 					html.Div(
 						gomponents.Group(gomponents.Map(len(state.Timezones), func(idx int) gomponents.Node {
-							return component.RenderComponent(state.Timezones[idx])
+							return page.RenderComponent(state.Timezones[idx])
 						})),
 					),
 					html.Script(html.Src("/live.js")),
