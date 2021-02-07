@@ -29,7 +29,7 @@ func newClock(s *live.Socket) *clock {
 }
 
 func (c clock) FormattedTime() string {
-	return c.Time.Format("15:04:05")
+	return c.Time.Format(time.RFC3339Nano)
 }
 
 func mount(ctx context.Context, h *live.Handler, r *http.Request, s *live.Socket, connected bool) (interface{}, error) {
@@ -41,7 +41,7 @@ func mount(ctx context.Context, h *live.Handler, r *http.Request, s *live.Socket
 	// event.
 	if connected {
 		go func() {
-			time.Sleep(1 * time.Second)
+			time.Sleep(100 * time.Millisecond)
 			h.Self(s, live.Event{T: tick})
 		}()
 	}
@@ -72,7 +72,7 @@ func main() {
 		c.Time = time.Now()
 		// Send ourselves another tick in a second.
 		go func(sock *live.Socket) {
-			time.Sleep(1 * time.Second)
+			time.Sleep(100 * time.Millisecond)
 			h.Self(sock, live.Event{T: tick})
 		}(s)
 		return c, nil
