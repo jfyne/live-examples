@@ -1,17 +1,17 @@
 {
     "name": "live-npm-example",
     "version": "0.0.0",
+    "type": "module",
     "description": "An example of importing the live package.",
     "scripts": {
-        "preinstall": "./init.sh",
-        "build": "npx esbuild --bundle index.js --outfile=main.js"
+        "prepare": "npx esbuild --bundle index.js --outfile=main.js"
     },
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "@jfyne/live": "../../web/jfyne-live-0.0.0.tgz"
+        "@jfyne/live": "^0.7.2"
     },
     "devDependencies": {
-        "esbuild": "^0.8.32"
+        "esbuild": "^0.8.44"
     }
 }
