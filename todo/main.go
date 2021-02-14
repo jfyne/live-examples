@@ -57,7 +57,7 @@ func main() {
 		log.Fatal(err)
 	}
 	// Set the mount function for this handler.
-	h.Mount = func(ctx context.Context, h *live.Handler, r *http.Request, s *live.Socket, connected bool) (interface{}, error) {
+	h.Mount = func(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
 		// This will initialise the form.
 		return newModel(s), nil
 	}
@@ -74,7 +74,7 @@ func main() {
 	}
 
 	// Validate the form.
-	h.HandleEvent(validate, func(s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(validate, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
 		m := newModel(s)
 		t := live.ParamString(p, "task")
 		vm := validateMessage(t)
@@ -85,7 +85,7 @@ func main() {
 	})
 
 	// Handle form saving.
-	h.HandleEvent(save, func(s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(save, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
 		m := newModel(s)
 		ts := live.ParamString(p, "task")
 		complete := live.ParamCheckbox(p, "complete")
@@ -104,7 +104,7 @@ func main() {
 	})
 
 	// Handle completing tasks.
-	h.HandleEvent(done, func(s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(done, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
 		m := newModel(s)
 		ID := live.ParamString(p, "id")
 		for idx, t := range m.Tasks {

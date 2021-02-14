@@ -36,7 +36,7 @@ func newPageState(title string) *PageState {
 // pageRegister register the pages events.
 func pageRegister(c *page.Component) error {
 	// Handler for the timezone entry validation.
-	c.HandleEvent(validateTZ, func(p map[string]interface{}) (interface{}, error) {
+	c.HandleEvent(validateTZ, func(ctx context.Context, p map[string]interface{}) (interface{}, error) {
 		// Get the current page component state.
 		state, _ := c.State.(*PageState)
 
@@ -58,7 +58,7 @@ func pageRegister(c *page.Component) error {
 	})
 
 	// Handler for adding a timezone.
-	c.HandleEvent(addTime, func(p map[string]interface{}) (interface{}, error) {
+	c.HandleEvent(addTime, func(ctx context.Context, p map[string]interface{}) (interface{}, error) {
 		// Get the current page component state.
 		state, _ := c.State.(*PageState)
 
@@ -90,7 +90,7 @@ func pageRegister(c *page.Component) error {
 
 // pageMount initialise the page component.
 func pageMount(title string) page.MountHandler {
-	return func(ctx context.Context, c *page.Component, r *http.Request, connected bool) error {
+	return func(ctx context.Context, c *page.Component, r *http.Request) error {
 		// Create a new page state.
 		c.State = newPageState(title)
 		return nil

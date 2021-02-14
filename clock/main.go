@@ -32,17 +32,17 @@ func (c clock) FormattedTime() string {
 	return c.Time.Format("15:04:05")
 }
 
-func mount(ctx context.Context, h *live.Handler, r *http.Request, s *live.Socket, connected bool) (interface{}, error) {
+func mount(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
 	// Take the socket data and tranform it into our view model if it is
 	// available.
 	c := newClock(s)
 
 	// If we are mouting the websocket connection, trigger the first tick
 	// event.
-	if connected {
+	if s.Connected() {
 		go func() {
 			time.Sleep(1 * time.Second)
-			h.Self(s, live.Event{T: tick})
+			s.Self(ctx, live.Event{T: tick})
 		}()
 	}
 	return c, nil
@@ -65,7 +65,7 @@ func main() {
 	// Server side events.
 
 	// tick event updates the clock every second.
-	h.HandleSelf(tick, func(s *live.Socket, _ map[string]interface{}) (interface{}, error) {
+	h.HandleSelf(tick, func(ctx context.Context, s *live.Socket, _ map[string]interface{}) (interface{}, error) {
 		// Get our model
 		c := newClock(s)
 		// Update the time.
@@ -73,7 +73,7 @@ func main() {
 		// Send ourselves another tick in a second.
 		go func(sock *live.Socket) {
 			time.Sleep(1 * time.Second)
-			h.Self(sock, live.Event{T: tick})
+			s.Self(ctx, live.Event{T: tick})
 		}(s)
 		return c, nil
 	})

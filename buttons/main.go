@@ -38,7 +38,7 @@ func main() {
 	}
 
 	// Set the mount function for this handler.
-	h.Mount = func(ctx context.Context, h *live.Handler, r *http.Request, s *live.Socket, connected bool) (interface{}, error) {
+	h.Mount = func(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
 		// This will initialise the counter if needed.
 		return newCounter(s), nil
 	}
@@ -46,7 +46,7 @@ func main() {
 	// Client side events.
 
 	// Increment event. Each click will increment the count by one.
-	h.HandleEvent(inc, func(s *live.Socket, _ map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(inc, func(ctx context.Context, s *live.Socket, _ map[string]interface{}) (interface{}, error) {
 		// Get this sockets counter struct.
 		c := newCounter(s)
 
@@ -58,7 +58,7 @@ func main() {
 	})
 
 	// Decrement event. Each click will increment the count by one.
-	h.HandleEvent(dec, func(s *live.Socket, _ map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(dec, func(ctx context.Context, s *live.Socket, _ map[string]interface{}) (interface{}, error) {
 		// Get this sockets counter struct.
 		c := newCounter(s)
 
