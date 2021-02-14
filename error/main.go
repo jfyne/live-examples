@@ -30,7 +30,7 @@ func main() {
 		w.Write([]byte("this is a bad request"))
 	}
 
-	h.HandleEvent(problem, func(s *live.Socket, _ map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(problem, func(ctx context.Context, s *live.Socket, _ map[string]interface{}) (interface{}, error) {
 		return nil, fmt.Errorf("hello")
 	})
 

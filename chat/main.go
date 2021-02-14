@@ -48,13 +48,13 @@ func main() {
 		log.Fatal(err)
 	}
 	// Set the mount function for this handler.
-	h.Mount = func(ctx context.Context, h *live.Handler, r *http.Request, s *live.Socket, connected bool) (interface{}, error) {
+	h.Mount = func(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
 		// This will initialise the chat for this socket.
 		return NewChatInstance(s), nil
 	}
 
 	// Handle user sending a message.
-	h.HandleEvent(send, func(s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(send, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
 		m := NewChatInstance(s)
 		msg := live.ParamString(p, "message")
 		if msg == "" {
@@ -65,7 +65,7 @@ func main() {
 	})
 
 	// Handle the broadcasted events.
-	h.HandleSelf(newmessage, func(s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleSelf(newmessage, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
 		m := NewChatInstance(s)
 		data, ok := p["message"]
 		if !ok {
