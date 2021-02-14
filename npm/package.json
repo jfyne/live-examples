@@ -9,7 +9,7 @@
     "author": "",
     "license": "MIT",
     "dependencies": {
-        "@jfyne/live": "^0.7.2"
+        "@jfyne/live": "^0.9.0"
     },
     "devDependencies": {
         "esbuild": "^0.8.44"
