@@ -22,14 +22,14 @@ const (
 type PageState struct {
 	Title           string
 	ValidationError string
-	Timezones       []page.Component
+	Timezones       []*page.Component
 }
 
 // newPageState create a new page state.
 func newPageState(title string) *PageState {
 	return &PageState{
 		Title:     title,
-		Timezones: []page.Component{},
+		Timezones: []*page.Component{},
 	}
 }
 
@@ -69,7 +69,7 @@ func pageRegister(c *page.Component) error {
 		}
 
 		// Use the page.Init function to create a new clock, register it and mount it.
-		clock, err := page.Init(context.Background(), func() (page.Component, error) {
+		clock, err := page.Init(context.Background(), func() (*page.Component, error) {
 			// Each clock requires its own unique stable ID. Events for each clock can then find
 			// their own component.
 			return NewClock(fmt.Sprintf("clock-%d", len(state.Timezones)+1), c.Handler, c.Socket, tz)
@@ -129,7 +129,7 @@ func pageRender(w io.Writer, c *page.Component) error {
 			),
 			html.Div(
 				gomponents.Group(gomponents.Map(len(state.Timezones), func(idx int) gomponents.Node {
-					return page.RenderComponent(state.Timezones[idx])
+					return page.Render(state.Timezones[idx])
 				})),
 			),
 			html.Script(html.Src("/live.js")),
@@ -138,7 +138,7 @@ func pageRender(w io.Writer, c *page.Component) error {
 }
 
 // NewPage create a new page component.
-func NewPage(ID string, h *live.Handler, s *live.Socket, title string) (page.Component, error) {
+func NewPage(ID string, h *live.Handler, s *live.Socket, title string) (*page.Component, error) {
 	return page.NewComponent(ID, h, s,
 		page.WithRegister(pageRegister),
 		page.WithMount(pageMount(title)),

@@ -100,7 +100,7 @@ func clockRender(w io.Writer, c *page.Component) error {
 }
 
 // NewClock create a new clock component.
-func NewClock(ID string, h *live.Handler, s *live.Socket, timezone string) (page.Component, error) {
+func NewClock(ID string, h *live.Handler, s *live.Socket, timezone string) (*page.Component, error) {
 	return page.NewComponent(ID, h, s,
 		page.WithRegister(clockRegister),
 		page.WithMount(clockMount(timezone)),
