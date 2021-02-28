@@ -1,4 +1,5 @@
 import { Live } from "@jfyne/live";
+import "alpinejs";
 
 document.addEventListener("DOMContentLoaded", (_) => {
     const hooks = {
@@ -10,6 +11,13 @@ document.addEventListener("DOMContentLoaded", (_) => {
             },
         },
     };
-    const l = new Live(hooks);
+    const dom = {
+        onBeforeElUpdated: (from, to) => {
+            if (from.__x) {
+                window.Alpine.clone(from.__x, to);
+            }
+        },
+    };
+    const l = new Live(hooks, dom);
     l.init();
 });
