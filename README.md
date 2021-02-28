@@ -9,7 +9,7 @@ Examples of [jfyne/live](https://github.com/jfyne/live).
 - [Clock](https://github.com/jfyne/live-examples/tree/main/clock)
 - [Error](https://github.com/jfyne/live-examples/tree/main/error)
 - [Todo](https://github.com/jfyne/live-examples/tree/main/todo)
-- [NPM](https://github.com/jfyne/live-examples/tree/main/npm)
+- [Alpinejs](https://github.com/jfyne/live-examples/tree/main/alpine)
 
 ## Live components
 
