@@ -1,7 +1,8 @@
-package main
+package chat
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -37,7 +38,7 @@ func NewChatInstance(s *live.Socket) *ChatInstance {
 	return m
 }
 
-func main() {
+func NewHandler() *live.Handler {
 	t, err := template.ParseFiles("chat/layout.html", "chat/view.html")
 	if err != nil {
 		log.Fatal(err)
@@ -60,7 +61,11 @@ func main() {
 		if msg == "" {
 			return m, nil
 		}
-		h.Broadcast(live.Event{T: newmessage, Data: map[string]interface{}{"message": Message{ID: live.NewID(), User: s.Session.ID, Msg: msg}}})
+		data, err := json.Marshal(Message{ID: live.NewID(), User: s.Session.ID, Msg: msg})
+		if err != nil {
+			return m, fmt.Errorf("failed marshalling message for broadcast: %w", err)
+		}
+		h.Broadcast(live.Event{T: newmessage, Data: map[string]interface{}{"message": string(data)}})
 		return m, nil
 	})
 
@@ -71,9 +76,13 @@ func main() {
 		if !ok {
 			return m, fmt.Errorf("no message key")
 		}
-		msg, ok := data.(Message)
+		raw, ok := data.(string)
 		if !ok {
-			return m, fmt.Errorf("malformed message")
+			return m, fmt.Errorf("no message bytes")
+		}
+		var msg Message
+		if err := json.Unmarshal([]byte(raw), &msg); err != nil {
+			return m, fmt.Errorf("malformed message: %w", err)
 		}
 		// Here we don't append to messages as we don't want to use
 		// loads of memory. `live-update="append"` handles the appending
@@ -82,9 +91,5 @@ func main() {
 		return m, nil
 	})
 
-	// Run the server.
-	http.Handle("/chat", h)
-	http.Handle("/live.js", live.Javascript{})
-	http.Handle("/auto.js.map", live.JavascriptMap{})
-	http.ListenAndServe(":8080", nil)
+	return h
 }
