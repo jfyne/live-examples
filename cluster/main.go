@@ -66,17 +66,27 @@ func (c *CloudTransport) Listen(ctx context.Context, p *live.PubSub) error {
 }
 
 func main() {
+	// Here we are creating three of the same handler to show
+	// how they can all receive the same broadcast messages.
 	chat1 := chat.NewHandler()
 	chat2 := chat.NewHandler()
 	chat3 := chat.NewHandler()
 
 	ctx := context.Background()
 
+	// We use the cloud transport defined above, which is
+	// simulating a pub sub type system in memory.
 	t, err := NewCloudTransport(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Create the pubsub instance.
 	pubsub := live.NewPubSub(ctx, t)
+
+	// Now subscribe each handler to the same "topic", this
+	// will then set them up to receive broadcasted events
+	// from each other.
 	pubsub.Subscribe(app, chat1)
 	pubsub.Subscribe(app, chat2)
 	pubsub.Subscribe(app, chat3)
