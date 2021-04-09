@@ -42,7 +42,7 @@ func mount(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, e
 	if s.Connected() {
 		go func() {
 			time.Sleep(1 * time.Second)
-			s.Self(ctx, live.Event{T: tick})
+			s.Self(ctx, tick, nil)
 		}()
 	}
 	return c, nil
@@ -65,7 +65,7 @@ func main() {
 	// Server side events.
 
 	// tick event updates the clock every second.
-	h.HandleSelf(tick, func(ctx context.Context, s *live.Socket, _ map[string]interface{}) (interface{}, error) {
+	h.HandleSelf(tick, func(ctx context.Context, s *live.Socket, _ live.Params) (interface{}, error) {
 		// Get our model
 		c := newClock(s)
 		// Update the time.
@@ -73,7 +73,7 @@ func main() {
 		// Send ourselves another tick in a second.
 		go func(sock *live.Socket) {
 			time.Sleep(1 * time.Second)
-			s.Self(ctx, live.Event{T: tick})
+			s.Self(ctx, tick, nil)
 		}(s)
 		return c, nil
 	})

@@ -1,4 +1,4 @@
-package main
+package chat
 
 import (
 	"context"
@@ -21,6 +21,14 @@ type Message struct {
 	Msg  string
 }
 
+func NewMessage(p live.Params) Message {
+	return Message{
+		ID:   p.String("ID"),
+		User: p.String("User"),
+		Msg:  p.String("Msg"),
+	}
+}
+
 type ChatInstance struct {
 	Messages []Message
 }
@@ -37,7 +45,7 @@ func NewChatInstance(s *live.Socket) *ChatInstance {
 	return m
 }
 
-func main() {
+func NewHandler() *live.Handler {
 	t, err := template.ParseFiles("chat/layout.html", "chat/view.html")
 	if err != nil {
 		log.Fatal(err)
@@ -54,37 +62,33 @@ func main() {
 	}
 
 	// Handle user sending a message.
-	h.HandleEvent(send, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(send, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
 		m := NewChatInstance(s)
-		msg := live.ParamString(p, "message")
+		msg := p.String("message")
 		if msg == "" {
 			return m, nil
 		}
-		h.Broadcast(live.Event{T: newmessage, Data: map[string]interface{}{"message": Message{ID: live.NewID(), User: s.Session.ID, Msg: msg}}})
+		data := map[string]interface{}{
+			"ID":   live.NewID(),
+			"User": s.Session.ID,
+			"Msg":  msg,
+		}
+		if err := h.Broadcast(newmessage, data); err != nil {
+			return m, fmt.Errorf("failed braodcasting new message: %w", err)
+		}
 		return m, nil
 	})
 
 	// Handle the broadcasted events.
-	h.HandleSelf(newmessage, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleSelf(newmessage, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
 		m := NewChatInstance(s)
-		data, ok := p["message"]
-		if !ok {
-			return m, fmt.Errorf("no message key")
-		}
-		msg, ok := data.(Message)
-		if !ok {
-			return m, fmt.Errorf("malformed message")
-		}
+
 		// Here we don't append to messages as we don't want to use
 		// loads of memory. `live-update="append"` handles the appending
 		// of messages in the DOM.
-		m.Messages = []Message{msg}
+		m.Messages = []Message{NewMessage(p)}
 		return m, nil
 	})
 
-	// Run the server.
-	http.Handle("/chat", h)
-	http.Handle("/live.js", live.Javascript{})
-	http.Handle("/auto.js.map", live.JavascriptMap{})
-	http.ListenAndServe(":8080", nil)
+	return h
 }

@@ -11,7 +11,7 @@ import (
 	"github.com/jfyne/live"
 )
 
-//go:embed main.js
+//go:embed index.js
 var static embed.FS
 
 const (
@@ -75,10 +75,10 @@ func main() {
 
 	h.Mount = mount
 
-	h.HandleEvent(suggest, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(suggest, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
 		a := newAutocomplete(s)
 		a.Suggestions = []item{}
-		search := live.ParamString(p, "search")
+		search := p.String("search")
 		for _, i := range a.items {
 			if i.Match(search) {
 				a.Suggestions = append(a.Suggestions, i)
@@ -87,9 +87,9 @@ func main() {
 		return a, nil
 	})
 
-	h.HandleEvent(selected, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(selected, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
 		a := newAutocomplete(s)
-		id := live.ParamString(p, "id")
+		id := p.String("id")
 		// Dont select option more than once.
 		for _, i := range a.Selected {
 			if i.ID == id {
@@ -105,7 +105,7 @@ func main() {
 		return a, nil
 	})
 
-	h.HandleEvent(submit, func(ctx context.Context, s *live.Socket, _ map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(submit, func(ctx context.Context, s *live.Socket, _ live.Params) (interface{}, error) {
 		return s.Assigns(), nil
 	})
 

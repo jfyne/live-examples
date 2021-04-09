@@ -36,12 +36,12 @@ func newPageState(title string) *PageState {
 // pageRegister register the pages events.
 func pageRegister(c *page.Component) error {
 	// Handler for the timezone entry validation.
-	c.HandleEvent(validateTZ, func(ctx context.Context, p map[string]interface{}) (interface{}, error) {
+	c.HandleEvent(validateTZ, func(ctx context.Context, p live.Params) (interface{}, error) {
 		// Get the current page component state.
 		state, _ := c.State.(*PageState)
 
 		// Get the tz coming from the form.
-		tz := live.ParamString(p, "tz")
+		tz := p.String("tz")
 
 		// Try to make a new ClockState, this will return an error if the
 		// timezone is not real.
@@ -58,12 +58,12 @@ func pageRegister(c *page.Component) error {
 	})
 
 	// Handler for adding a timezone.
-	c.HandleEvent(addTime, func(ctx context.Context, p map[string]interface{}) (interface{}, error) {
+	c.HandleEvent(addTime, func(ctx context.Context, p live.Params) (interface{}, error) {
 		// Get the current page component state.
 		state, _ := c.State.(*PageState)
 
 		// Get the timezone sent from the form input.
-		tz := live.ParamString(p, "tz")
+		tz := p.String("tz")
 		if tz == "" {
 			return state, nil
 		}

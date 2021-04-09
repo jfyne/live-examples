@@ -74,9 +74,9 @@ func main() {
 	}
 
 	// Validate the form.
-	h.HandleEvent(validate, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(validate, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
 		m := newModel(s)
-		t := live.ParamString(p, "task")
+		t := p.String("task")
 		vm := validateMessage(t)
 		if vm != "" {
 			m.Form.Errors["message"] = vm
@@ -85,10 +85,10 @@ func main() {
 	})
 
 	// Handle form saving.
-	h.HandleEvent(save, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(save, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
 		m := newModel(s)
-		ts := live.ParamString(p, "task")
-		complete := live.ParamCheckbox(p, "complete")
+		ts := p.String("task")
+		complete := p.Checkbox("complete")
 		vm := validateMessage(ts)
 		if vm != "" {
 			m.Form.Errors["message"] = vm
@@ -104,9 +104,9 @@ func main() {
 	})
 
 	// Handle completing tasks.
-	h.HandleEvent(done, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(done, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
 		m := newModel(s)
-		ID := live.ParamString(p, "id")
+		ID := p.String("id")
 		for idx, t := range m.Tasks {
 			if t.ID != ID {
 				continue
