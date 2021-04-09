@@ -46,7 +46,7 @@ func main() {
 	// Client side events.
 
 	// Increment event. Each click will increment the count by one.
-	h.HandleEvent(inc, func(ctx context.Context, s *live.Socket, _ map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(inc, func(ctx context.Context, s *live.Socket, _ live.Params) (interface{}, error) {
 		// Get this sockets counter struct.
 		c := newCounter(s)
 
@@ -58,7 +58,7 @@ func main() {
 	})
 
 	// Decrement event. Each click will increment the count by one.
-	h.HandleEvent(dec, func(ctx context.Context, s *live.Socket, _ map[string]interface{}) (interface{}, error) {
+	h.HandleEvent(dec, func(ctx context.Context, s *live.Socket, _ live.Params) (interface{}, error) {
 		// Get this sockets counter struct.
 		c := newCounter(s)
 

@@ -54,16 +54,16 @@ func main() {
 	// Set the handle params function. This gets called after mount and contains the URL
 	// query string values in the params map. This will also get called whenever the query
 	// string is changed on the page.
-	h.HandleParams(func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
+	h.HandleParams(func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
 		l := newList(s)
-		l.Page = live.ParamInt(p, "page")
+		l.Page = p.Int("page")
 		l.Items = getPageOfItems(l.Page)
 		return l, nil
 	})
 
 	// Alternative method to get to next page, using the server side Patch event.
-	h.HandleEvent(nextPage, func(ctx context.Context, s *live.Socket, p map[string]interface{}) (interface{}, error) {
-		page := live.ParamInt(p, "page")
+	h.HandleEvent(nextPage, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+		page := p.Int("page")
 		v := url.Values{}
 		v.Add("page", fmt.Sprintf("%d", page))
 		s.PatchURL(v)

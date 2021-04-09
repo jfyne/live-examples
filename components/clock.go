@@ -51,7 +51,7 @@ func NewClockState(timezone string) (*ClockState, error) {
 func clockRegister(c *page.Component) error {
 	// The clock listens for a tick event, then sends a new one after a second. On this
 	// event it updates its own time.
-	c.HandleSelf(tick, func(ctx context.Context, _ map[string]interface{}) (interface{}, error) {
+	c.HandleSelf(tick, func(ctx context.Context, _ live.Params) (interface{}, error) {
 		clock, ok := c.State.(*ClockState)
 		if !ok {
 			return nil, fmt.Errorf("no clock data")
@@ -60,7 +60,7 @@ func clockRegister(c *page.Component) error {
 
 		go func(sock *live.Socket) {
 			time.Sleep(1 * time.Second)
-			c.Self(ctx, sock, live.Event{T: tick})
+			c.Self(ctx, sock, tick, nil)
 		}(c.Socket)
 
 		return clock, nil
@@ -75,7 +75,7 @@ func clockMount(timezone string) page.MountHandler {
 		if c.Socket.Connected() {
 			go func() {
 				time.Sleep(1 * time.Second)
-				c.Self(ctx, c.Socket, live.Event{T: tick})
+				c.Self(ctx, c.Socket, tick, nil)
 			}()
 		}
 		state, err := NewClockState(timezone)

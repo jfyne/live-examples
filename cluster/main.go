@@ -68,6 +68,7 @@ func (c *CloudTransport) Listen(ctx context.Context, p *live.PubSub) error {
 func main() {
 	chat1 := chat.NewHandler()
 	chat2 := chat.NewHandler()
+	chat3 := chat.NewHandler()
 
 	ctx := context.Background()
 
@@ -78,10 +79,12 @@ func main() {
 	pubsub := live.NewPubSub(ctx, t)
 	pubsub.Subscribe(app, chat1)
 	pubsub.Subscribe(app, chat2)
+	pubsub.Subscribe(app, chat3)
 
 	// Run the server.
 	http.Handle("/one", chat1)
 	http.Handle("/two", chat2)
+	http.Handle("/three", chat2)
 	http.Handle("/live.js", live.Javascript{})
 	http.Handle("/auto.js.map", live.JavascriptMap{})
 	http.ListenAndServe(":8080", nil)
