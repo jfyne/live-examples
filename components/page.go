@@ -8,9 +8,9 @@ import (
 
 	"github.com/jfyne/live"
 	"github.com/jfyne/live/page"
-	"github.com/maragudk/gomponents"
-	comp "github.com/maragudk/gomponents/components"
-	"github.com/maragudk/gomponents/html"
+	g "github.com/maragudk/gomponents"
+	c "github.com/maragudk/gomponents/components"
+	. "github.com/maragudk/gomponents/html"
 )
 
 const (
@@ -98,41 +98,41 @@ func pageMount(title string) page.MountHandler {
 }
 
 // pageRender render the page component.
-func pageRender(w io.Writer, c *page.Component) error {
-	state, ok := c.State.(*PageState)
+func pageRender(w io.Writer, cmp *page.Component) error {
+	state, ok := cmp.State.(*PageState)
 	if !ok {
 		return fmt.Errorf("could not get state")
 	}
 
 	// Here we use the gomponents library to do typed rendering.
 	// https://github.com/maragudk/gomponents
-	return comp.HTML5(comp.HTML5Props{
+	return c.HTML5(c.HTML5Props{
 		Title:    state.Title,
 		Language: "en",
-		Head: []gomponents.Node{
-			html.StyleEl(html.Type("text/css"),
-				gomponents.Raw(`body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }`),
+		Head: []g.Node{
+			StyleEl(Type("text/css"),
+				g.Raw(`body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }`),
 			),
 		},
-		Body: []gomponents.Node{
-			html.H1(gomponents.Text("World Clocks")),
-			html.FormEl(
-				html.ID("tz-form"),
-				gomponents.Attr("live-change", c.Event(validateTZ)), // c.Event scopes the events to this component.
-				gomponents.Attr("live-submit", c.Event(addTime)),
-				html.Div(
-					html.P(gomponents.Text("Try Europe/London or America/New_York")),
-					html.Input(html.Name("tz")),
-					gomponents.If(state.ValidationError != "", html.Span(gomponents.Text(state.ValidationError))),
+		Body: []g.Node{
+			H1(g.Text("World Clocks")),
+			FormEl(
+				ID("tz-form"),
+				g.Attr("live-change", cmp.Event(validateTZ)), // c.Event scopes the events to this component.
+				g.Attr("live-submit", cmp.Event(addTime)),
+				Div(
+					P(g.Text("Try Europe/London or America/New_York")),
+					Input(Name("tz")),
+					g.If(state.ValidationError != "", Span(g.Text(state.ValidationError))),
 				),
-				html.Input(html.Type("submit"), gomponents.If(state.ValidationError != "", html.Disabled())),
+				Input(Type("submit"), g.If(state.ValidationError != "", Disabled())),
 			),
-			html.Div(
-				gomponents.Group(gomponents.Map(len(state.Timezones), func(idx int) gomponents.Node {
+			Div(
+				g.Group(g.Map(len(state.Timezones), func(idx int) g.Node {
 					return page.Render(state.Timezones[idx])
 				})),
 			),
-			html.Script(html.Src("/live.js")),
+			Script(Src("/live.js")),
 		},
 	}).Render(w)
 }
