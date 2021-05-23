@@ -115,7 +115,7 @@ func pageRender(w io.Writer, c *page.Component) error {
 			),
 		},
 		Body: []gomponents.Node{
-			html.H1("World Clocks"),
+			html.H1(gomponents.Text("World Clocks")),
 			html.FormEl(
 				html.ID("tz-form"),
 				gomponents.Attr("live-change", c.Event(validateTZ)), // c.Event scopes the events to this component.
