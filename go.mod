@@ -3,7 +3,7 @@ module github.com/jfyne/live-examples
 go 1.16
 
 require (
-	github.com/jfyne/live v0.10.0
+	github.com/jfyne/live v0.10.3
 	github.com/maragudk/gomponents v0.16.0
 	gocloud.dev v0.22.0
 )
