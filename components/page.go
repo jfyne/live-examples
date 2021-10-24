@@ -10,7 +10,7 @@ import (
 	"github.com/jfyne/live/page"
 	g "github.com/maragudk/gomponents"
 	c "github.com/maragudk/gomponents/components"
-	. "github.com/maragudk/gomponents/html"
+	h "github.com/maragudk/gomponents/html"
 )
 
 const (
@@ -36,7 +36,7 @@ func newPageState(title string) *PageState {
 // pageRegister register the pages events.
 func pageRegister(c *page.Component) error {
 	// Handler for the timezone entry validation.
-	c.HandleEvent(validateTZ, func(ctx context.Context, p live.Params) (interface{}, error) {
+	c.HandleEvent(validateTZ, func(_ context.Context, p live.Params) (interface{}, error) {
 		// Get the current page component state.
 		state, _ := c.State.(*PageState)
 
@@ -58,7 +58,7 @@ func pageRegister(c *page.Component) error {
 	})
 
 	// Handler for adding a timezone.
-	c.HandleEvent(addTime, func(ctx context.Context, p live.Params) (interface{}, error) {
+	c.HandleEvent(addTime, func(_ context.Context, p live.Params) (interface{}, error) {
 		// Get the current page component state.
 		state, _ := c.State.(*PageState)
 
@@ -90,7 +90,7 @@ func pageRegister(c *page.Component) error {
 
 // pageMount initialise the page component.
 func pageMount(title string) page.MountHandler {
-	return func(ctx context.Context, c *page.Component, r *http.Request) error {
+	return func(_ context.Context, c *page.Component, _ *http.Request) error {
 		// Create a new page state.
 		c.State = newPageState(title)
 		return nil
@@ -110,29 +110,29 @@ func pageRender(w io.Writer, cmp *page.Component) error {
 		Title:    state.Title,
 		Language: "en",
 		Head: []g.Node{
-			StyleEl(Type("text/css"),
+			h.StyleEl(h.Type("text/css"),
 				g.Raw(`body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }`),
 			),
 		},
 		Body: []g.Node{
-			H1(g.Text("World Clocks")),
-			FormEl(
-				ID("tz-form"),
+			h.H1(g.Text("World Clocks")),
+			h.FormEl(
+				h.ID("tz-form"),
 				g.Attr("live-change", cmp.Event(validateTZ)), // c.Event scopes the events to this component.
 				g.Attr("live-submit", cmp.Event(addTime)),
-				Div(
-					P(g.Text("Try Europe/London or America/New_York")),
-					Input(Name("tz")),
-					g.If(state.ValidationError != "", Span(g.Text(state.ValidationError))),
+				h.Div(
+					h.P(g.Text("Try Europe/London or America/New_York")),
+					h.Input(h.Name("tz")),
+					g.If(state.ValidationError != "", h.Span(g.Text(state.ValidationError))),
 				),
-				Input(Type("submit"), g.If(state.ValidationError != "", Disabled())),
+				h.Input(h.Type("submit"), g.If(state.ValidationError != "", h.Disabled())),
 			),
-			Div(
+			h.Div(
 				g.Group(g.Map(len(state.Timezones), func(idx int) g.Node {
 					return page.Render(state.Timezones[idx])
 				})),
 			),
-			Script(Src("/live.js")),
+			h.Script(h.Src("/live.js")),
 		},
 	}).Render(w)
 }
