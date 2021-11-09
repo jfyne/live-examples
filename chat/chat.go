@@ -38,7 +38,7 @@ func NewChatInstance(s *live.Socket) *ChatInstance {
 	if !ok {
 		return &ChatInstance{
 			Messages: []Message{
-				{ID: live.NewID(), User: "Room", Msg: "Welcome to chat " + s.Session.ID},
+				{ID: live.NewID(), User: "Room", Msg: "Welcome to chat " + live.SessionID(s.Session)},
 			},
 		}
 	}
@@ -70,7 +70,7 @@ func NewHandler() *live.Handler {
 		}
 		data := map[string]interface{}{
 			"ID":   live.NewID(),
-			"User": s.Session.ID,
+			"User": live.SessionID(s.Session),
 			"Msg":  msg,
 		}
 		if err := h.Broadcast(newmessage, data); err != nil {
