@@ -198,8 +198,8 @@ github.com/hashicorp/golang-lru v0.5.0/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ
 github.com/hashicorp/golang-lru v0.5.1/go.mod h1:/m3WP610KZHVQ1SGc6re/UDhFvYD7pJ4Ao+sR/qLZy8=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
-github.com/jfyne/live v0.12.2 h1:lrjlIyKZBSQZTyd5x8qvAE9mjgsfrH9xgBmKT2R/eTA=
-github.com/jfyne/live v0.12.2/go.mod h1:P2nykhj1/KgxZBtTnCoa1Pcui0ty0NYTzefxAqDQr+g=
+github.com/jfyne/live v0.12.3 h1:FWENuWwdHg1sJnoAlUlhz8vhFJyU613g2Q4QSn6aCQs=
+github.com/jfyne/live v0.12.3/go.mod h1:P2nykhj1/KgxZBtTnCoa1Pcui0ty0NYTzefxAqDQr+g=
 github.com/jmespath/go-jmespath v0.0.0-20160202185014-0b12d6b521d8/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/jmespath/go-jmespath v0.4.0/go.mod h1:T8mJZnbsbmF+m6zOOFylbeCJqk5+pHWvzYPziyZiYoo=
