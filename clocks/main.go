@@ -14,7 +14,7 @@ func main() {
 	// Setup handler.
 	h, err := live.NewHandler(
 		live.NewCookieStore("session-name", []byte("weak-secret")),
-		page.WithComponentMount(func(ctx context.Context, h *live.Handler, r *http.Request, s *live.Socket) (*page.Component, error) {
+		page.WithComponentMount(func(ctx context.Context, h live.Handler, s live.Socket) (*page.Component, error) {
 			return components.NewPage("app", h, s, "Clocks")
 		}),
 		page.WithComponentRenderer(),

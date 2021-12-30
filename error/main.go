@@ -25,12 +25,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h.Error = func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("this is a bad request"))
-	}
+	// Uncomment the below to see the server respond with an error immediately.
 
-	h.HandleEvent(problem, func(ctx context.Context, s *live.Socket, _ live.Params) (interface{}, error) {
+	//h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
+	//	return nil, fmt.Errorf("mount failure")
+	//})
+
+	h.HandleError(func(ctx context.Context, err error) {
+		w := live.Writer(ctx)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("this is a bad request: " + err.Error()))
+	})
+
+	h.HandleEvent(problem, func(ctx context.Context, s live.Socket, _ live.Params) (interface{}, error) {
 		return nil, fmt.Errorf("hello")
 	})
 

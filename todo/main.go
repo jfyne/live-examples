@@ -31,7 +31,7 @@ type model struct {
 	Form  form
 }
 
-func newModel(s *live.Socket) *model {
+func newModel(s live.Socket) *model {
 	m, ok := s.Assigns().(*model)
 	if !ok {
 		return &model{
@@ -57,10 +57,10 @@ func main() {
 		log.Fatal(err)
 	}
 	// Set the mount function for this handler.
-	h.Mount = func(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
+	h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
 		// This will initialise the form.
 		return newModel(s), nil
-	}
+	})
 
 	// Client side events.
 	validateMessage := func(msg string) string {
@@ -74,7 +74,7 @@ func main() {
 	}
 
 	// Validate the form.
-	h.HandleEvent(validate, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+	h.HandleEvent(validate, func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
 		m := newModel(s)
 		t := p.String("task")
 		vm := validateMessage(t)
@@ -85,7 +85,7 @@ func main() {
 	})
 
 	// Handle form saving.
-	h.HandleEvent(save, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+	h.HandleEvent(save, func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
 		m := newModel(s)
 		ts := p.String("task")
 		complete := p.Checkbox("complete")
@@ -104,7 +104,7 @@ func main() {
 	})
 
 	// Handle completing tasks.
-	h.HandleEvent(done, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+	h.HandleEvent(done, func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
 		m := newModel(s)
 		ID := p.String("id")
 		for idx, t := range m.Tasks {

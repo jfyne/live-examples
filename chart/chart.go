@@ -19,7 +19,7 @@ type chartData struct {
 	Sales []int
 }
 
-func newChartData(s *live.Socket) *chartData {
+func newChartData(s live.Socket) *chartData {
 	d, ok := s.Assigns().(*chartData)
 	if !ok {
 		return &chartData{
@@ -43,15 +43,15 @@ func main() {
 	}
 
 	// Set the mount function for this handler.
-	h.Mount = func(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
+	h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
 		// This will initialise the chart data if needed.
 		return newChartData(s), nil
-	}
+	})
 
 	// Client side events.
 
 	// Regenerate event, creates new random sales data.
-	h.HandleEvent(regenerate, func(ctx context.Context, s *live.Socket, _ live.Params) (interface{}, error) {
+	h.HandleEvent(regenerate, func(ctx context.Context, s live.Socket, _ live.Params) (interface{}, error) {
 		// Get this sockets counter struct.
 		c := newChartData(s)
 

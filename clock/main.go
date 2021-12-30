@@ -18,7 +18,7 @@ type clock struct {
 	Time time.Time
 }
 
-func newClock(s *live.Socket) *clock {
+func newClock(s live.Socket) *clock {
 	c, ok := s.Assigns().(*clock)
 	if !ok {
 		return &clock{
@@ -32,7 +32,7 @@ func (c clock) FormattedTime() string {
 	return c.Time.Format("15:04:05")
 }
 
-func mount(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
+func mount(ctx context.Context, s live.Socket) (interface{}, error) {
 	// Take the socket data and tranform it into our view model if it is
 	// available.
 	c := newClock(s)
@@ -60,20 +60,20 @@ func main() {
 	}
 
 	// Set the mount function for this handler.
-	h.Mount = mount
+	h.HandleMount(mount)
 
 	// Server side events.
 
 	// tick event updates the clock every second.
-	h.HandleSelf(tick, func(ctx context.Context, s *live.Socket, _ live.Params) (interface{}, error) {
+	h.HandleSelf(tick, func(ctx context.Context, s live.Socket, _ live.Params) (interface{}, error) {
 		// Get our model
 		c := newClock(s)
 		// Update the time.
 		c.Time = time.Now()
 		// Send ourselves another tick in a second.
-		go func(sock *live.Socket) {
+		go func(sock live.Socket) {
 			time.Sleep(1 * time.Second)
-			s.Self(ctx, tick, nil)
+			sock.Self(ctx, tick, nil)
 		}(s)
 		return c, nil
 	})

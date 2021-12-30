@@ -4,9 +4,12 @@ import (
 	"context"
 	"html/template"
 	"log"
-	"net/http"
 
+	"github.com/gofiber/adaptor/v2"
+	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/session"
 	"github.com/jfyne/live"
+	"github.com/jfyne/live-contrib/livefiber"
 )
 
 const (
@@ -32,7 +35,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h, err := live.NewHandler(live.NewCookieStore("session-name", []byte("weak-secret")), live.WithTemplateRenderer(t))
+	store := session.New()
+	h, err := livefiber.NewHandler(store, live.WithTemplateRenderer(t))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -70,8 +74,12 @@ func main() {
 	})
 
 	// Run the server.
-	http.Handle("/buttons", h)
-	http.Handle("/live.js", live.Javascript{})
-	http.Handle("/auto.js.map", live.JavascriptMap{})
-	http.ListenAndServe(":8080", nil)
+	app := fiber.New()
+
+	app.Get("/fiber", h.Handler()...)
+	app.Get("/live.js", adaptor.HTTPHandler(live.Javascript{}))
+	app.Get("/auto.js.map", adaptor.HTTPHandler(live.JavascriptMap{}))
+
+	log.Fatal(app.Listen(":8080"))
+
 }

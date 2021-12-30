@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net/http"
 
 	"github.com/jfyne/live"
 	"github.com/jfyne/live/page"
@@ -90,7 +89,7 @@ func pageRegister(c *page.Component) error {
 
 // pageMount initialise the page component.
 func pageMount(title string) page.MountHandler {
-	return func(_ context.Context, c *page.Component, _ *http.Request) error {
+	return func(_ context.Context, c *page.Component) error {
 		// Create a new page state.
 		c.State = newPageState(title)
 		return nil
@@ -138,7 +137,7 @@ func pageRender(w io.Writer, cmp *page.Component) error {
 }
 
 // NewPage create a new page component.
-func NewPage(ID string, h *live.Handler, s *live.Socket, title string) (*page.Component, error) {
+func NewPage(ID string, h live.Handler, s live.Socket, title string) (*page.Component, error) {
 	return page.NewComponent(ID, h, s,
 		page.WithRegister(pageRegister),
 		page.WithMount(pageMount(title)),

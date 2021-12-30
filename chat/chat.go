@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"html/template"
 	"log"
-	"net/http"
 
 	"github.com/jfyne/live"
 )
@@ -33,19 +32,19 @@ type ChatInstance struct {
 	Messages []Message
 }
 
-func NewChatInstance(s *live.Socket) *ChatInstance {
+func NewChatInstance(s live.Socket) *ChatInstance {
 	m, ok := s.Assigns().(*ChatInstance)
 	if !ok {
 		return &ChatInstance{
 			Messages: []Message{
-				{ID: live.NewID(), User: "Room", Msg: "Welcome to chat " + live.SessionID(s.Session)},
+				{ID: live.NewID(), User: "Room", Msg: "Welcome to chat " + live.SessionID(s.Session())},
 			},
 		}
 	}
 	return m
 }
 
-func NewHandler() *live.Handler {
+func NewHandler() *live.HTTPHandler {
 	t, err := template.ParseFiles("chat/layout.html", "chat/view.html")
 	if err != nil {
 		log.Fatal(err)
@@ -56,13 +55,13 @@ func NewHandler() *live.Handler {
 		log.Fatal(err)
 	}
 	// Set the mount function for this handler.
-	h.Mount = func(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
+	h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
 		// This will initialise the chat for this socket.
 		return NewChatInstance(s), nil
-	}
+	})
 
 	// Handle user sending a message.
-	h.HandleEvent(send, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+	h.HandleEvent(send, func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
 		m := NewChatInstance(s)
 		msg := p.String("message")
 		if msg == "" {
@@ -70,7 +69,7 @@ func NewHandler() *live.Handler {
 		}
 		data := map[string]interface{}{
 			"ID":   live.NewID(),
-			"User": live.SessionID(s.Session),
+			"User": live.SessionID(s.Session()),
 			"Msg":  msg,
 		}
 		if err := h.Broadcast(newmessage, data); err != nil {
@@ -80,7 +79,7 @@ func NewHandler() *live.Handler {
 	})
 
 	// Handle the broadcasted events.
-	h.HandleSelf(newmessage, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+	h.HandleSelf(newmessage, func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
 		m := NewChatInstance(s)
 
 		// Here we don't append to messages as we don't want to use
