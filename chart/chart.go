@@ -15,6 +15,27 @@ const (
 	regenerate = "regenerate"
 )
 
+type RandomEngine struct {
+	*live.HttpEngine
+}
+
+func NewRandomEngine(h live.Handler) *RandomEngine {
+	e := &RandomEngine{
+		live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h),
+	}
+	return e
+}
+
+func (e *RandomEngine) Start() {
+	go func() {
+		ticker := time.NewTicker(2 * time.Second)
+		for {
+			<-ticker.C
+			e.Broadcast(regenerate, nil)
+		}
+	}()
+}
+
 type chartData struct {
 	Sales []int
 }
@@ -48,7 +69,7 @@ func main() {
 	// Client side events.
 
 	// Regenerate event, creates new random sales data.
-	h.HandleEvent(regenerate, func(ctx context.Context, s live.Socket, _ live.Params) (interface{}, error) {
+	h.HandleSelf(regenerate, func(ctx context.Context, s live.Socket, _ live.Params) (interface{}, error) {
 		// Get this sockets counter struct.
 		c := newChartData(s)
 
@@ -59,8 +80,11 @@ func main() {
 		return c, nil
 	})
 
+	e := NewRandomEngine(h)
+	e.Start()
+
 	// Run the server.
-	http.Handle("/chart", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
+	http.Handle("/chart", e)
 	http.Handle("/live.js", live.Javascript{})
 	http.Handle("/auto.js.map", live.JavascriptMap{})
 	http.ListenAndServe(":8080", nil)
