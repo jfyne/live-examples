@@ -42,7 +42,7 @@ type Autocomplete struct {
 	Selected    []item
 }
 
-func newAutocomplete(s *live.Socket) *Autocomplete {
+func newAutocomplete(s live.Socket) *Autocomplete {
 	a, ok := s.Assigns().(*Autocomplete)
 	if !ok {
 		return &Autocomplete{}
@@ -50,7 +50,7 @@ func newAutocomplete(s *live.Socket) *Autocomplete {
 	return a
 }
 
-func mount(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
+func mount(ctx context.Context, s live.Socket) (interface{}, error) {
 	a := newAutocomplete(s)
 	a.items = []item{
 		{ID: "1", Name: "Item One"},
@@ -68,14 +68,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h, err := live.NewHandler(live.NewCookieStore("session-name", []byte("weak-secret")), live.WithTemplateRenderer(t))
-	if err != nil {
-		log.Fatal(err)
-	}
+	h := live.NewHandler(live.WithTemplateRenderer(t))
 
-	h.Mount = mount
+	h.HandleMount(mount)
 
-	h.HandleEvent(suggest, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+	h.HandleEvent(suggest, func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
 		a := newAutocomplete(s)
 		a.Suggestions = []item{}
 		search := p.String("search")
@@ -87,7 +84,7 @@ func main() {
 		return a, nil
 	})
 
-	h.HandleEvent(selected, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+	h.HandleEvent(selected, func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
 		a := newAutocomplete(s)
 		id := p.String("id")
 		// Dont select option more than once.
@@ -105,11 +102,11 @@ func main() {
 		return a, nil
 	})
 
-	h.HandleEvent(submit, func(ctx context.Context, s *live.Socket, _ live.Params) (interface{}, error) {
+	h.HandleEvent(submit, func(ctx context.Context, s live.Socket, _ live.Params) (interface{}, error) {
 		return s.Assigns(), nil
 	})
 
-	http.Handle("/alpine", h)
+	http.Handle("/alpine", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
 	http.ListenAndServe(":8080", nil)
 }

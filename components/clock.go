@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"net/http"
 	"time"
 
 	"github.com/jfyne/live"
@@ -58,7 +57,7 @@ func clockRegister(c *page.Component) error {
 		}
 		clock.Update()
 
-		go func(sock *live.Socket) {
+		go func(sock live.Socket) {
 			time.Sleep(1 * time.Second)
 			c.Self(ctx, sock, tick, nil)
 		}(c.Socket)
@@ -70,7 +69,7 @@ func clockRegister(c *page.Component) error {
 
 // clockMount initialise the clock component.
 func clockMount(timezone string) page.MountHandler {
-	return func(ctx context.Context, c *page.Component, r *http.Request) error {
+	return func(ctx context.Context, c *page.Component) error {
 		// If we are mounting on connection send the first tick event.
 		if c.Socket.Connected() {
 			go func() {
@@ -100,7 +99,7 @@ func clockRender(w io.Writer, c *page.Component) error {
 }
 
 // NewClock create a new clock component.
-func NewClock(ID string, h *live.Handler, s *live.Socket, timezone string) (*page.Component, error) {
+func NewClock(ID string, h live.Handler, s live.Socket, timezone string) (*page.Component, error) {
 	return page.NewComponent(ID, h, s,
 		page.WithRegister(clockRegister),
 		page.WithMount(clockMount(timezone)),

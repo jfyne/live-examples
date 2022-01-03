@@ -20,21 +20,25 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h, err := live.NewHandler(live.NewCookieStore("session-name", []byte("weak-secret")), live.WithTemplateRenderer(t))
-	if err != nil {
-		log.Fatal(err)
-	}
+	h := live.NewHandler(live.WithTemplateRenderer(t))
 
-	h.Error = func(ctx context.Context, w http.ResponseWriter, r *http.Request, err error) {
+	// Uncomment the below to see the server respond with an error immediately.
+
+	//h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
+	//	return nil, fmt.Errorf("mount failure")
+	//})
+
+	h.HandleError(func(ctx context.Context, err error) {
+		w := live.Writer(ctx)
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("this is a bad request"))
-	}
+		w.Write([]byte("this is a bad request: " + err.Error()))
+	})
 
-	h.HandleEvent(problem, func(ctx context.Context, s *live.Socket, _ live.Params) (interface{}, error) {
+	h.HandleEvent(problem, func(ctx context.Context, s live.Socket, _ live.Params) (interface{}, error) {
 		return nil, fmt.Errorf("hello")
 	})
 
-	http.Handle("/error", h)
+	http.Handle("/error", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
 	http.Handle("/live.js", live.Javascript{})
 	http.Handle("/auto.js.map", live.JavascriptMap{})
 	http.ListenAndServe(":8080", nil)

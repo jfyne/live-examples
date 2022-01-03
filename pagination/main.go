@@ -20,7 +20,7 @@ type list struct {
 	Page  int
 }
 
-func newList(s *live.Socket) *list {
+func newList(s live.Socket) *list {
 	l, ok := s.Assigns().(*list)
 	if !ok {
 		l = &list{
@@ -41,20 +41,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h, err := live.NewHandler(live.NewCookieStore("session-name", []byte("weak-secret")), live.WithTemplateRenderer(t))
-	if err != nil {
-		log.Fatal(err)
-	}
+	h := live.NewHandler(live.WithTemplateRenderer(t))
 
 	// Set the mount function for this handler.
-	h.Mount = func(ctx context.Context, r *http.Request, s *live.Socket) (interface{}, error) {
+	h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
 		return newList(s), nil
-	}
+	})
 
 	// Set the handle params function. This gets called after mount and contains the URL
 	// query string values in the params map. This will also get called whenever the query
 	// string is changed on the page.
-	h.HandleParams(func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+	h.HandleParams(func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
 		l := newList(s)
 		l.Page = p.Int("page")
 		l.Items = getPageOfItems(l.Page)
@@ -62,7 +59,7 @@ func main() {
 	})
 
 	// Alternative method to get to next page, using the server side Patch event.
-	h.HandleEvent(nextPage, func(ctx context.Context, s *live.Socket, p live.Params) (interface{}, error) {
+	h.HandleEvent(nextPage, func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
 		page := p.Int("page")
 		v := url.Values{}
 		v.Add("page", fmt.Sprintf("%d", page))
@@ -71,7 +68,7 @@ func main() {
 	})
 
 	// Run the server.
-	http.Handle("/pagination", h)
+	http.Handle("/pagination", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
 	http.Handle("/live.js", live.Javascript{})
 	http.Handle("/auto.js.map", live.JavascriptMap{})
 	http.ListenAndServe(":8080", nil)
