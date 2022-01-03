@@ -35,11 +35,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	store := session.New()
-	h, err := livefiber.NewHandler(store, live.WithTemplateRenderer(t))
-	if err != nil {
-		log.Fatal(err)
-	}
+	h := live.NewHandler(live.WithTemplateRenderer(t))
 
 	// Set the mount function for this handler.
 	h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
@@ -76,7 +72,7 @@ func main() {
 	// Run the server.
 	app := fiber.New()
 
-	app.Get("/fiber", h.Handler()...)
+	app.Get("/fiber", livefiber.NewHandler(session.New(), h).Handlers()...)
 	app.Get("/live.js", adaptor.HTTPHandler(live.Javascript{}))
 	app.Get("/auto.js.map", adaptor.HTTPHandler(live.JavascriptMap{}))
 

@@ -37,10 +37,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h, err := live.NewHandler(live.NewCookieStore("session-name", []byte("weak-secret")), live.WithTemplateRenderer(t))
-	if err != nil {
-		log.Fatal(err)
-	}
+	h := live.NewHandler(live.WithTemplateRenderer(t))
 
 	// Set the mount function for this handler.
 	h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
@@ -63,7 +60,7 @@ func main() {
 	})
 
 	// Run the server.
-	http.Handle("/chart", h)
+	http.Handle("/chart", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
 	http.Handle("/live.js", live.Javascript{})
 	http.Handle("/auto.js.map", live.JavascriptMap{})
 	http.ListenAndServe(":8080", nil)

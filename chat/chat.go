@@ -44,16 +44,14 @@ func NewChatInstance(s live.Socket) *ChatInstance {
 	return m
 }
 
-func NewHandler() *live.HTTPHandler {
+func NewHandler() live.Handler {
 	t, err := template.ParseFiles("chat/layout.html", "chat/view.html")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	h, err := live.NewHandler(live.NewCookieStore("session-name", []byte("weak-secret")), live.WithTemplateRenderer(t))
-	if err != nil {
-		log.Fatal(err)
-	}
+	h := live.NewHandler(live.WithTemplateRenderer(t))
+
 	// Set the mount function for this handler.
 	h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
 		// This will initialise the chat for this socket.
@@ -72,7 +70,7 @@ func NewHandler() *live.HTTPHandler {
 			"User": live.SessionID(s.Session()),
 			"Msg":  msg,
 		}
-		if err := h.Broadcast(newmessage, data); err != nil {
+		if err := s.Broadcast(newmessage, data); err != nil {
 			return m, fmt.Errorf("failed braodcasting new message: %w", err)
 		}
 		return m, nil

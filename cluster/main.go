@@ -68,9 +68,9 @@ func (c *CloudTransport) Listen(ctx context.Context, p *live.PubSub) error {
 func main() {
 	// Here we are creating three of the same handler to show
 	// how they can all receive the same broadcast messages.
-	chat1 := chat.NewHandler()
-	chat2 := chat.NewHandler()
-	chat3 := chat.NewHandler()
+	chat1 := live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), chat.NewHandler())
+	chat2 := live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), chat.NewHandler())
+	chat3 := live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), chat.NewHandler())
 
 	ctx := context.Background()
 
@@ -94,7 +94,7 @@ func main() {
 	// Run the server.
 	http.Handle("/one", chat1)
 	http.Handle("/two", chat2)
-	http.Handle("/three", chat2)
+	http.Handle("/three", chat3)
 	http.Handle("/live.js", live.Javascript{})
 	http.Handle("/auto.js.map", live.JavascriptMap{})
 	http.ListenAndServe(":8080", nil)

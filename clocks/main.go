@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"net/http"
 
 	"github.com/jfyne/live"
@@ -12,18 +11,14 @@ import (
 
 func main() {
 	// Setup handler.
-	h, err := live.NewHandler(
-		live.NewCookieStore("session-name", []byte("weak-secret")),
+	h := live.NewHandler(
 		page.WithComponentMount(func(ctx context.Context, h live.Handler, s live.Socket) (*page.Component, error) {
 			return components.NewPage("app", h, s, "Clocks")
 		}),
 		page.WithComponentRenderer(),
 	)
-	if err != nil {
-		log.Fatal(err)
-	}
 
-	http.Handle("/clocks", h)
+	http.Handle("/clocks", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
 	http.Handle("/live.js", live.Javascript{})
 	http.Handle("/auto.js.map", live.JavascriptMap{})
 	http.ListenAndServe(":8080", nil)

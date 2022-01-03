@@ -68,10 +68,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h, err := live.NewHandler(live.NewCookieStore("session-name", []byte("weak-secret")), live.WithTemplateRenderer(t))
-	if err != nil {
-		log.Fatal(err)
-	}
+	h := live.NewHandler(live.WithTemplateRenderer(t))
 
 	h.HandleMount(mount)
 
@@ -109,7 +106,7 @@ func main() {
 		return s.Assigns(), nil
 	})
 
-	http.Handle("/alpine", h)
+	http.Handle("/alpine", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
 	http.ListenAndServe(":8080", nil)
 }

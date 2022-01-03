@@ -20,10 +20,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	h, err := live.NewHandler(live.NewCookieStore("session-name", []byte("weak-secret")), live.WithTemplateRenderer(t))
-	if err != nil {
-		log.Fatal(err)
-	}
+	h := live.NewHandler(live.WithTemplateRenderer(t))
 
 	// Uncomment the below to see the server respond with an error immediately.
 
@@ -41,7 +38,7 @@ func main() {
 		return nil, fmt.Errorf("hello")
 	})
 
-	http.Handle("/error", h)
+	http.Handle("/error", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
 	http.Handle("/live.js", live.Javascript{})
 	http.Handle("/auto.js.map", live.JavascriptMap{})
 	http.ListenAndServe(":8080", nil)
