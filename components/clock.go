@@ -27,8 +27,8 @@ func (c ClockState) FormattedTime() string {
 }
 
 // Update the states time.
-func (c *ClockState) Update() {
-	c.Time = time.Now().In(c.loc)
+func (c *ClockState) Update(t time.Time) {
+	c.Time = t.In(c.loc)
 }
 
 // NewClockState create a new clock state from a timezone string.
@@ -50,16 +50,16 @@ func NewClockState(timezone string) (*ClockState, error) {
 func clockRegister(c *page.Component) error {
 	// The clock listens for a tick event, then sends a new one after a second. On this
 	// event it updates its own time.
-	c.HandleSelf(tick, func(ctx context.Context, _ live.Params) (interface{}, error) {
+	c.HandleSelf(tick, func(ctx context.Context, d interface{}) (interface{}, error) {
 		clock, ok := c.State.(*ClockState)
 		if !ok {
 			return nil, fmt.Errorf("no clock data")
 		}
-		clock.Update()
+		clock.Update(d.(time.Time))
 
 		go func(sock live.Socket) {
 			time.Sleep(1 * time.Second)
-			c.Self(ctx, sock, tick, nil)
+			c.Self(ctx, sock, tick, time.Now())
 		}(c.Socket)
 
 		return clock, nil
@@ -74,7 +74,7 @@ func clockMount(timezone string) page.MountHandler {
 		if c.Socket.Connected() {
 			go func() {
 				time.Sleep(1 * time.Second)
-				c.Self(ctx, c.Socket, tick, nil)
+				c.Self(ctx, c.Socket, tick, time.Now())
 			}()
 		}
 		state, err := NewClockState(timezone)

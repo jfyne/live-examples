@@ -31,7 +31,7 @@ func (e *RandomEngine) Start() {
 		ticker := time.NewTicker(2 * time.Second)
 		for {
 			<-ticker.C
-			e.Broadcast(regenerate, nil)
+			e.Broadcast(regenerate, rand.Perm(9))
 		}
 	}()
 }
@@ -69,12 +69,12 @@ func main() {
 	// Client side events.
 
 	// Regenerate event, creates new random sales data.
-	h.HandleSelf(regenerate, func(ctx context.Context, s live.Socket, _ live.Params) (interface{}, error) {
+	h.HandleSelf(regenerate, func(ctx context.Context, s live.Socket, d interface{}) (interface{}, error) {
 		// Get this sockets counter struct.
 		c := newChartData(s)
 
 		// Generate new sales data.
-		c.Sales = rand.Perm(9)
+		c.Sales = d.([]int)
 
 		// Set the new chart data back to the socket.
 		return c, nil

@@ -20,12 +20,12 @@ type Message struct {
 	Msg  string
 }
 
-func NewMessage(p live.Params) Message {
-	return Message{
-		ID:   p.String("ID"),
-		User: p.String("User"),
-		Msg:  p.String("Msg"),
+func NewMessage(data interface{}) Message {
+	m, ok := data.(Message)
+	if !ok {
+		return Message{}
 	}
+	return m
 }
 
 type ChatInstance struct {
@@ -77,13 +77,13 @@ func NewHandler() live.Handler {
 	})
 
 	// Handle the broadcasted events.
-	h.HandleSelf(newmessage, func(ctx context.Context, s live.Socket, p live.Params) (interface{}, error) {
+	h.HandleSelf(newmessage, func(ctx context.Context, s live.Socket, data interface{}) (interface{}, error) {
 		m := NewChatInstance(s)
 
 		// Here we don't append to messages as we don't want to use
 		// loads of memory. `live-update="append"` handles the appending
 		// of messages in the DOM.
-		m.Messages = []Message{NewMessage(p)}
+		m.Messages = []Message{NewMessage(data)}
 		return m, nil
 	})
 

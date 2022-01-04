@@ -21,14 +21,14 @@ const (
 type PageState struct {
 	Title           string
 	ValidationError string
-	Timezones       []*page.Component
+	Clocks          []*page.Component
 }
 
 // newPageState create a new page state.
 func newPageState(title string) *PageState {
 	return &PageState{
-		Title:     title,
-		Timezones: []*page.Component{},
+		Title:  title,
+		Clocks: []*page.Component{},
 	}
 }
 
@@ -71,14 +71,14 @@ func pageRegister(c *page.Component) error {
 		clock, err := page.Init(context.Background(), func() (*page.Component, error) {
 			// Each clock requires its own unique stable ID. Events for each clock can then find
 			// their own component.
-			return NewClock(fmt.Sprintf("clock-%d", len(state.Timezones)+1), c.Handler, c.Socket, tz)
+			return NewClock(fmt.Sprintf("clock-%d", len(state.Clocks)+1), c.Handler, c.Socket, tz)
 		})
 		if err != nil {
 			return state, err
 		}
 
 		// Update the page state with the new clock.
-		state.Timezones = append(state.Timezones, clock)
+		state.Clocks = append(state.Clocks, clock)
 
 		// Return the state to have it persisted.
 		return state, nil
@@ -127,8 +127,8 @@ func pageRender(w io.Writer, cmp *page.Component) error {
 				h.Input(h.Type("submit"), g.If(state.ValidationError != "", h.Disabled())),
 			),
 			h.Div(
-				g.Group(g.Map(len(state.Timezones), func(idx int) g.Node {
-					return page.Render(state.Timezones[idx])
+				g.Group(g.Map(len(state.Clocks), func(idx int) g.Node {
+					return page.Render(state.Clocks[idx])
 				})),
 			),
 			h.Script(h.Src("/live.js")),
