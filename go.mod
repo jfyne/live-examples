@@ -7,7 +7,7 @@ require (
 	github.com/gofiber/adaptor/v2 v2.1.16
 	github.com/gofiber/fiber/v2 v2.24.0
 	github.com/gofiber/websocket/v2 v2.0.15 // indirect
-	github.com/jfyne/live v0.14.0
+	github.com/jfyne/live v0.14.1
 	github.com/jfyne/live-contrib/livefiber v0.0.0-20220103185958-b2842d565a19
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/maragudk/gomponents v0.16.0
