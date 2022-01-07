@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"html/template"
 	"log"
 
 	"github.com/gofiber/adaptor/v2"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/session"
+	"github.com/gofiber/template/html"
 	"github.com/jfyne/live"
 	"github.com/jfyne/live-contrib/livefiber"
 )
@@ -30,12 +30,7 @@ func newCounter(s live.Socket) *counter {
 }
 
 func main() {
-	t, err := template.ParseFiles("root.html", "buttons/view.html")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	h := live.NewHandler(live.WithTemplateRenderer(t))
+	h := live.NewHandler(livefiber.WithViewsRenderer("view", "root"))
 
 	// Set the mount function for this handler.
 	h.HandleMount(func(ctx context.Context, s live.Socket) (interface{}, error) {
@@ -70,7 +65,9 @@ func main() {
 	})
 
 	// Run the server.
-	app := fiber.New()
+	app := fiber.New(fiber.Config{
+		Views: html.New("./fiber", ".html"),
+	})
 
 	app.Get("/fiber", livefiber.NewHandler(session.New(), h).Handlers()...)
 	app.Get("/live.js", adaptor.HTTPHandler(live.Javascript{}))
