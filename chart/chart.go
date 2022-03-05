@@ -84,7 +84,7 @@ func main() {
 	e.Start()
 
 	// Run the server.
-	http.Handle("/chart", e)
+	http.Handle("/", e)
 	http.Handle("/live.js", live.Javascript{})
 	http.Handle("/auto.js.map", live.JavascriptMap{})
 	http.ListenAndServe(":8080", nil)

@@ -8,13 +8,8 @@ require (
 	github.com/gofiber/fiber/v2 v2.24.0
 	github.com/gofiber/template v1.6.21
 	github.com/gofiber/websocket/v2 v2.0.15 // indirect
-	github.com/jfyne/live v0.14.1
+	github.com/jfyne/live v0.15.0
 	github.com/jfyne/live-contrib/livefiber v0.0.0-20220107081735-2eb3c35b606c
-	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/maragudk/gomponents v0.16.0
-	github.com/rs/xid v1.3.0 // indirect
 	gocloud.dev v0.22.0
-	golang.org/x/net v0.0.0-20220105145211-5b0dc2dfae98 // indirect
-	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
-	golang.org/x/time v0.0.0-20211116232009-f0f3c7e86c11 // indirect
 )

@@ -69,7 +69,7 @@ func main() {
 		Views: html.New("./fiber", ".html"),
 	})
 
-	app.Get("/fiber", livefiber.NewHandler(session.New(), h).Handlers()...)
+	app.Get("/", livefiber.NewHandler(session.New(), h).Handlers()...)
 	app.Get("/live.js", adaptor.HTTPHandler(live.Javascript{}))
 	app.Get("/auto.js.map", adaptor.HTTPHandler(live.JavascriptMap{}))
 

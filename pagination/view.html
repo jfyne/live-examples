@@ -6,17 +6,17 @@
     }
 </style>
 <div class="list">
-    <p>Showing page {{.Page}}</p>
-    {{range .Items}}
+    <p>Showing page {{.Assigns.Page}}</p>
+    {{range .Assigns.Items}}
         <div>{{.}}</div>
     {{end}}
 </div>
 <div class="controls">
     <div>
-        <a live-patch href="?page={{.NextPage}}">Next page via client patch</a>
+        <a live-patch href="?page={{.Assigns.NextPage}}">Next page via client patch</a>
     </div>
     <div>
-        <button live-click="next-page" live-value-page="{{.NextPage}}">Next page via serverside patch</button>
+        <button live-click="next-page" live-value-page="{{.Assigns.NextPage}}">Next page via serverside patch</button>
     </div>
 </div>
 {{ end }}
