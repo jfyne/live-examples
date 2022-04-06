@@ -21,11 +21,18 @@ type Message struct {
 }
 
 func NewMessage(data interface{}) Message {
-	m, ok := data.(Message)
-	if !ok {
-		return Message{}
+	// This can handle both the chat example, and the cluster example.
+	switch m := data.(type) {
+	case Message:
+		return m
+	case map[string]interface{}:
+		return Message{
+			ID:   m["ID"].(string),
+			User: m["User"].(string),
+			Msg:  m["Msg"].(string),
+		}
 	}
-	return m
+	return Message{}
 }
 
 type ChatInstance struct {
@@ -65,10 +72,10 @@ func NewHandler() live.Handler {
 		if msg == "" {
 			return m, nil
 		}
-		data := map[string]interface{}{
-			"ID":   live.NewID(),
-			"User": live.SessionID(s.Session()),
-			"Msg":  msg,
+		data := Message{
+			ID:   live.NewID(),
+			User: live.SessionID(s.Session()),
+			Msg:  msg,
 		}
 		if err := s.Broadcast(newmessage, data); err != nil {
 			return m, fmt.Errorf("failed braodcasting new message: %w", err)

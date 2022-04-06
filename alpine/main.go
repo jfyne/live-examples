@@ -11,7 +11,7 @@ import (
 	"github.com/jfyne/live"
 )
 
-//go:embed index.js
+//go:embed main.js
 var static embed.FS
 
 const (
@@ -106,7 +106,7 @@ func main() {
 		return s.Assigns(), nil
 	})
 
-	http.Handle("/alpine", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
+	http.Handle("/", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
 	http.ListenAndServe(":8080", nil)
 }

@@ -31,7 +31,7 @@
                     x-show="isOpen"
                     x-ref="suggestions"
                 >
-                    {{ range $idx, $i := .Suggestions }}
+                    {{ range $idx, $i := .Assigns.Suggestions }}
                     <li
                         id="item-{{$idx}}"
                         x-ref="item-{{$idx}}"
@@ -52,7 +52,7 @@
 
         <div class="selected">
             <ul>
-                {{ range $idx, $i := .Selected }}
+                {{ range $idx, $i := .Assigns.Selected }}
                 <li id="selected-item-{{$idx}}" class="item">{{$i.Name}}</li>
                 {{ end }}
             </ul>
