@@ -2,43 +2,28 @@ package components
 
 import (
 	"context"
-	"fmt"
-	"io"
 	"time"
 
-	"github.com/jfyne/live"
 	"github.com/jfyne/live/page"
 )
 
-const (
-	tick = "tick"
-)
-
-// ClockState the state we are tracking per clock.
-type ClockState struct {
+// Clock is a timezone aware clock.
+type Clock struct {
 	TZ   string
 	Time time.Time
 	loc  *time.Location
+
+	page.Component
 }
 
-// FormattedTime output the time in a nice format.
-func (c ClockState) FormattedTime() string {
-	return c.Time.Format("15:04:05")
-}
-
-// Update the states time.
-func (c *ClockState) Update(t time.Time) {
-	c.Time = t.In(c.loc)
-}
-
-// NewClockState create a new clock state from a timezone string.
-func NewClockState(timezone string) (*ClockState, error) {
+// NewClock create a new clock component.
+func NewClock(timezone string) (*Clock, error) {
 	location, err := time.LoadLocation(timezone)
 	if err != nil {
 		return nil, err
 	}
 	now := time.Now().In(location)
-	c := &ClockState{
+	c := &Clock{
 		Time: now,
 		loc:  location,
 		TZ:   timezone,
@@ -46,63 +31,34 @@ func NewClockState(timezone string) (*ClockState, error) {
 	return c, nil
 }
 
-// clockRegister register the clocks events.
-func clockRegister(c *page.Component) error {
-	// The clock listens for a tick event, then sends a new one after a second. On this
-	// event it updates its own time.
-	c.HandleSelf(tick, func(ctx context.Context, d interface{}) (interface{}, error) {
-		clock, ok := c.State.(*ClockState)
-		if !ok {
-			return nil, fmt.Errorf("no clock data")
-		}
-		clock.Update(d.(time.Time))
+func (c Clock) FormattedTime() string {
+	return c.Time.Format(time.RubyDate)
+}
 
-		go func(sock live.Socket) {
+func (c *Clock) Mount(ctx context.Context) error {
+	// If we are mounting on connection send the first tick event.
+	if c.Socket.Connected() {
+		go func() {
 			time.Sleep(1 * time.Second)
-			c.Self(ctx, sock, tick, time.Now())
-		}(c.Socket)
-
-		return clock, nil
-	})
+			c.Self(ctx, "tick", time.Now())
+		}()
+	}
 	return nil
 }
 
-// clockMount initialise the clock component.
-func clockMount(timezone string) page.MountHandler {
-	return func(ctx context.Context, c *page.Component) error {
-		// If we are mounting on connection send the first tick event.
-		if c.Socket.Connected() {
-			go func() {
-				time.Sleep(1 * time.Second)
-				c.Self(ctx, c.Socket, tick, time.Now())
-			}()
-		}
-		state, err := NewClockState(timezone)
-		if err != nil {
-			return err
-		}
-		c.State = state
-		return nil
-	}
-}
-
-// clockRender render the clock component.
-func clockRender(w io.Writer, c *page.Component) error {
-	// The page.HTML helper function renders a go template and passes in the
-	// component state.
+func (c Clock) Render() page.RenderFunc {
 	return page.HTML(`
         <div>
             <p>{{.TZ}}</p>
-            <time>{{.FormattedTime}}</time>
+            <time datetime="{{.Time}}">{{.FormattedTime}}</time>
         </div>
-    `, c).Render(w)
+    `, c)
 }
 
-// NewClock create a new clock component.
-func NewClock(ID string, h live.Handler, s live.Socket, timezone string) (*page.Component, error) {
-	return page.NewComponent(ID, h, s,
-		page.WithRegister(clockRegister),
-		page.WithMount(clockMount(timezone)),
-		page.WithRender(clockRender),
-	)
+func (c *Clock) OnTick(ctx context.Context, t time.Time) {
+	c.Time = t.In(c.loc)
+	go func() {
+		time.Sleep(1 * time.Second)
+		c.Self(ctx, "tick", time.Now())
+	}()
 }

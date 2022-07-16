@@ -10,13 +10,9 @@ import (
 )
 
 func main() {
-	// Setup handler.
-	h := live.NewHandler(
-		page.WithComponentMount(func(ctx context.Context, h live.Handler, s live.Socket) (*page.Component, error) {
-			return components.NewPage("app", h, s, "Clocks")
-		}),
-		page.WithComponentRenderer(),
-	)
+	h := page.NewHandler(func(ctx context.Context, h *live.Handler, s live.Socket) (page.ComponentLifecycle, error) {
+		return components.NewClocks("Clocks")
+	})
 
 	http.Handle("/", live.NewHttpHandler(live.NewCookieStore("session-name", []byte("weak-secret")), h))
 	http.Handle("/live.js", live.Javascript{})
