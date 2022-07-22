@@ -6,9 +6,6 @@ import (
 
 	"github.com/jfyne/live"
 	"github.com/jfyne/live/page"
-	g "github.com/maragudk/gomponents"
-	co "github.com/maragudk/gomponents/components"
-	h "github.com/maragudk/gomponents/html"
 )
 
 // Clocks component handles creating new timezone clocks.
@@ -29,35 +26,39 @@ func NewClocks(title string) (*Clocks, error) {
 }
 
 func (c Clocks) Render() page.RenderFunc {
-	return co.HTML5(co.HTML5Props{
-		Title:    c.Title,
-		Language: "en",
-		Head: []g.Node{
-			h.StyleEl(h.Type("text/css"),
-				g.Raw(`body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }`),
-			),
-		},
-		Body: []g.Node{
-			h.H1(g.Text("World Clocks")),
-			h.FormEl(
-				h.ID("tz-form"),
-				g.Attr("live-change", c.Event("validate-tz")), // c.Event scopes the events to this component.
-				g.Attr("live-submit", c.Event("add-time")),
-				h.Div(
-					h.P(g.Text("Try Europe/London or America/New_York")),
-					h.Input(h.Name("tz")),
-					g.If(c.ValidationError != "", h.Span(g.Text(c.ValidationError))),
-				),
-				h.Input(h.Type("submit"), g.If(c.ValidationError != "", h.Disabled())),
-			),
-			h.Div(
-				g.Group(g.Map(len(c.Clocks), func(idx int) g.Node {
-					return c.Clocks[idx].Render()
-				})),
-			),
-			h.Script(h.Src("/live.js")),
-		},
-	}).Render
+	return page.HTML(`
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="x-ua-compatible" content="ie=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>{{.Title}}</title>
+        <style>
+            body {font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"; }
+        </style>
+      </head>
+      <body>
+        <h1>World Clocks</h1>
+        <form id="tz-form" live-change="{{ Event "validate-tz" }}" live-submit="{{ Event "add-time" }}">
+            <div>
+                <p>Try Europe/London or America/New_York</p>
+                <input name="tz">
+                {{ if ne .ValidationError "" }}
+                    <span>{{ .ValidationError }}</span>
+                {{ end }}
+            </div>
+            <input type="submit" {{ if ne .ValidationError "" }} diabaled="true" {{ end }}>
+        </form>
+        <div>
+            {{ range .Clocks }}
+                {{ Component . }}
+            {{ end }}
+        </div>
+        <script src="/live.js"></script>
+      </body>
+    </html>
+    `, c)
 }
 
 func (c *Clocks) OnValidateTz(ctx context.Context, p live.Params) error {
@@ -90,7 +91,6 @@ func (c *Clocks) OnAddTime(ctx context.Context, p live.Params) error {
 	if err != nil {
 		return err
 	}
-	//
 	if err := page.Start(ctx, fmt.Sprintf("clock-%d", len(c.Clocks)+1), c.Handler, c.Socket, clock); err != nil {
 		return err
 	}

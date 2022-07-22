@@ -11,7 +11,6 @@ require (
 	github.com/jfyne/live v0.15.5
 	github.com/jfyne/live-contrib/livefiber v0.0.0-20220107081735-2eb3c35b606c
 	github.com/klauspost/compress v1.16.7 // indirect
-	github.com/maragudk/gomponents v0.16.0
 	github.com/rs/xid v1.5.0 // indirect
 	gocloud.dev v0.22.0
 	golang.org/x/net v0.12.0 // indirect
